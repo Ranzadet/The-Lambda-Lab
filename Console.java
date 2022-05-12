@@ -20,7 +20,7 @@ public class Console {
 			System.out.println(e);
 		}
 
-		System.out.println("λ");
+		System.out.println("λ works!");
 		
 		Lexer lexer = new Lexer();
 		Parser parser = new Parser();

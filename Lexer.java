@@ -25,19 +25,19 @@ public class Lexer {
 		important.add("=");
 		important.add("(");
 		important.add(")");
+				
 		
-		
-
 
 		String currString = "";
-		for (int i = 0; i<input.length();i++){
+		int i = 0;
+		while(i<input.length()){
 			String c = input.substring(i,i+1);
 			try{
-				if(input.substring(i,i+2).equals("λ")){
+				if(c.equals("λ")){
 					if(!currString.strip().equals(""))
 						tokens.add(currString.strip());
 					tokens.add("\\");
-					i++;
+					//i++;
 					currString = "";
 				}
 				//System.out.println(c);
@@ -45,7 +45,7 @@ public class Lexer {
 			catch(Exception e){	
 			}
 			
-			if (Character.isAlphabetic(c.charAt(0))){
+			if (isLetter(c.charAt(0))){
 				currString += c;
 			}
 			if(c.equals(" ")){
@@ -61,6 +61,8 @@ public class Lexer {
 				tokens.add(currString);
 				currString = "";
 			}
+			
+			i++;
 		}
 		if(!currString.equals(""))
 			tokens.add(currString);
@@ -68,7 +70,19 @@ public class Lexer {
 		String s = "" + (char)206;
 		tokens.removeAll(Arrays.asList(s));
 		
+		//System.out.println(tokens);
 		return tokens;
+	}
+	
+	private boolean isLetter(Character c) {
+		char start1 = 'a';
+		char end1 = 'z';
+		char start2 = 'A';
+		char end2 = 'Z';
+		
+		if ((c >= start1 && c <= end1) || (c >= start2 && c <= end2))
+			return true;
+		return false;
 	}
 
 
