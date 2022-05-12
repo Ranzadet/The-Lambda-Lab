@@ -68,20 +68,29 @@ public class Parser {
 			return exp;
 		}
 		if(s.equals("=")){
-			/*
-			 * 
-			 */
-//			ArrayList<Expression> valsEx = new ArrayList<>(symbols.values());
-//			ArrayList<String> valsStr = new ArrayList<>();
-//			valsEx.forEach(val -> valsStr.add(val.toString()));
 			ArrayList<String> keys = new ArrayList(symbols.keySet());
 			Expression n = symbols.putIfAbsent(exp.toString(), _parse(null));
 			if(n == null && !keys.contains(firstToken)){
-				return new Variable("Added " + exp + " as " + symbols.get(exp.toString()));
+				return new Variable("Added " + symbols.get(exp.toString()) + " as " + exp);
 			}
 			else{
 				return new Variable(firstToken + " is already defined");
 			}
+		}
+		if(s.equals("run")){
+			Expression runnable = _parse(null);
+			if (runnable instanceof Variable)
+				return runnable;
+			if (runnable instanceof Function)
+				return runnable;
+			if (!(((Application)runnable).getLeft() instanceof Function)){
+				return runnable;
+			}
+
+			
+			
+
+			return null;
 		}
 		else{
 			//otherwise, the token is a variable

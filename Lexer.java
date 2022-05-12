@@ -79,8 +79,10 @@ public class Lexer {
 		char end1 = 'z';
 		char start2 = 'A';
 		char end2 = 'Z';
+		char start3 = '0';
+		char end3 = '9';
 		
-		if ((c >= start1 && c <= end1) || (c >= start2 && c <= end2))
+		if ((c >= start1 && c <= end1) || (c >= start2 && c <= end2) || (c >= start3 && c <= end3))
 			return true;
 		return false;
 	}
