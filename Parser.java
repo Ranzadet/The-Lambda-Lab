@@ -79,15 +79,8 @@ public class Parser {
 		}
 		if(s.equals("run")){
 			Expression runnable = _parse(null);
-			if (runnable instanceof Variable)
-				return runnable;
-			if (runnable instanceof Function)
-				return runnable;
-			if (!(((Application)runnable).getLeft() instanceof Function)){
-				return runnable;
-			}
-
-			return run(runnable);
+			Expression ran = run(runnable);
+			return ran;
 		}
 		else{
 			//otherwise, the token is a variable
@@ -103,6 +96,24 @@ public class Parser {
 			return _parse(new Application(exp, mapped)); //later, check for s in stored expressions list
 		}
 	}
+	
+	
+//	public Expression reduceExp (Expression runnable) {
+//		if (runnable instanceof Variable)
+//			return runnable;
+//		if (runnable instanceof Function) {
+//			if (!(((Function)runnable).getExp() instanceof Variable)) {
+//				return reduceExp(((Function)runnable).getExp());
+//			}
+//			return runnable;
+//		}
+//		if (!(((Application)runnable).getLeft() instanceof Function)){
+//			return runnable;
+//		}
+//		
+//		Expression ran = run(runnable);
+//		return reduceExp(ran);
+//	}
 
 
 	private Expression run(Expression exp){
@@ -111,23 +122,31 @@ public class Parser {
 
 		if (exp instanceof Function){
 			if (((Function)exp).getExp() instanceof Application){
-				return run(((Function)exp).getExp());
+				return new Function(((Function)exp).getVar(), run((((Function)exp).getExp())));
 			}
 			return exp;
 		}
+		
 			
 
 		Expression left = run(((Application)exp).getLeft());
 		Expression right = run(((Application)exp).getRight());
+		Expression newApp = new Application(left, right);
 
 		if(left instanceof Function){
 			Variable var = ((Function)left).getVar();
 			Expression funcExp = ((Function)left).getExp();
-			return varReplace(var, funcExp, right);
+			newApp = varReplace(var, funcExp, right);
+			if(newApp instanceof Application) {
+				return run(newApp);
+			}
 		}
-
-
-		return null;
+		
+//		if(left instanceof Application) {
+//			exp = new Application(run(left))
+//			return run(exp);
+//		}
+		return newApp;
 	}
 
 	private Expression varReplace(Variable v, Expression e, Expression replace){
@@ -137,8 +156,12 @@ public class Parser {
 		if (e instanceof Application){
 			return new Application(varReplace(v, ((Application)e).getLeft(), replace), varReplace(v, ((Application)e).getRight(), replace));
 		}
+		if (e instanceof Function) {
+			return new Function(((Function)e).getVar(), varReplace(v, ((Function)e).getExp(), replace));
+		}
 
-		return null;
+		
+		return e;
 	} 
 
 }

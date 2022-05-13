@@ -39,6 +39,7 @@ public class Console {
 				output = exp.toString();
 			} catch (Exception e) {
 				System.out.println("Unparsable expression, input was: \"" + input + "\"");
+				System.out.println(e);
 				input = cleanConsoleInput();
 				continue;
 			}
