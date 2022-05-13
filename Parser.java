@@ -87,10 +87,7 @@ public class Parser {
 				return runnable;
 			}
 
-			
-			
-
-			return null;
+			return run(runnable);
 		}
 		else{
 			//otherwise, the token is a variable
@@ -108,15 +105,40 @@ public class Parser {
 	}
 
 
-	// public Expression treeTraverse(String s, Expression exp, int index){
-	// 	String s = tokens.get(index);
-	// 	while(!s.equals(")") && index < tokens.size()){
+	private Expression run(Expression exp){
+		if (exp instanceof Variable)
+			return exp;
+
+		if (exp instanceof Function){
+			if (((Function)exp).getExp() instanceof Application){
+				return run(((Function)exp).getExp());
+			}
+			return exp;
+		}
+			
+
+		Expression left = run(((Application)exp).getLeft());
+		Expression right = run(((Application)exp).getRight());
+
+		if(left instanceof Function){
+			Variable var = ((Function)left).getVar();
+			Expression funcExp = ((Function)left).getExp();
+			return varReplace(var, funcExp, right);
+		}
 
 
-	// 		index++;
-	// 	}
+		return null;
+	}
 
-	// 	return null;
-	// }
+	private Expression varReplace(Variable v, Expression e, Expression replace){
+		if (e.toString().equals(v.toString())){
+			return replace;
+		}
+		if (e instanceof Application){
+			return new Application(varReplace(v, ((Application)e).getLeft(), replace), varReplace(v, ((Application)e).getRight(), replace));
+		}
+
+		return null;
+	} 
 
 }
