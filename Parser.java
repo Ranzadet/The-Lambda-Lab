@@ -105,11 +105,14 @@ public class Parser {
 		if (exp instanceof Variable)
 			return exp;
 
+//		if (exp instanceof Function){
+//			if (((Function)exp).getExp() instanceof Application){
+//				return new Function(((Function)exp).getVar(), run((((Function)exp).getExp())));
+//			}
+//			return exp;
+//		}
 		if (exp instanceof Function){
-			if (((Function)exp).getExp() instanceof Application){
-				return new Function(((Function)exp).getVar(), run((((Function)exp).getExp())));
-			}
-			return exp;
+			return new Function(((Function)exp).getVar(), run((((Function)exp).getExp())));
 		}
 		
 			
@@ -133,9 +136,10 @@ public class Parser {
 				}
 			}
 			
-			if(newApp instanceof Application) {
-				return run(newApp);
-			}
+//			if(newApp instanceof Application) {
+//				return run(newApp);
+//			
+			return run(newApp);
 		}
 		
 //		if(left instanceof Application) {
