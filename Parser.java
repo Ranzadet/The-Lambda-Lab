@@ -9,7 +9,8 @@ public class Parser {
 	private String firstToken = "";
 	
 	/*
-	 * TODO: prevent reuse of variable names
+	 * TODO: enable two-way lookup table to simplify expressions
+	 * 
 	 */
 	public Expression parse(ArrayList<String> tokenList) throws ParseException {
 		tokens = tokenList;
@@ -98,22 +99,6 @@ public class Parser {
 	}
 	
 	
-//	public Expression reduceExp (Expression runnable) {
-//		if (runnable instanceof Variable)
-//			return runnable;
-//		if (runnable instanceof Function) {
-//			if (!(((Function)runnable).getExp() instanceof Variable)) {
-//				return reduceExp(((Function)runnable).getExp());
-//			}
-//			return runnable;
-//		}
-//		if (!(((Application)runnable).getLeft() instanceof Function)){
-//			return runnable;
-//		}
-//		
-//		Expression ran = run(runnable);
-//		return reduceExp(ran);
-//	}
 
 
 	private Expression run(Expression exp){
@@ -134,9 +119,20 @@ public class Parser {
 		Expression newApp = new Application(left, right);
 
 		if(left instanceof Function){
+			ArrayList<String> oldNames = new ArrayList<>();
+			ArrayList<Variable> oldVars = new ArrayList<>();
+			getVarNames(right, oldNames, oldVars); //getVarNames will just add all variables in said expression into the arrayList
 			Variable var = ((Function)left).getVar();
 			Expression funcExp = ((Function)left).getExp();
 			newApp = varReplace(var, funcExp, right);
+			if(newApp instanceof Function) {
+				// if(((Function)newApp).getVar().toString().equals(right.toString())) { 
+				if(oldNames.contains(((Function)newApp).getVar().getName())){
+					((Function)newApp).alphaReduce();
+					replaceVarNames(oldNames, oldVars);
+				}
+			}
+			
 			if(newApp instanceof Application) {
 				return run(newApp);
 			}
@@ -150,8 +146,10 @@ public class Parser {
 	}
 
 	private Expression varReplace(Variable v, Expression e, Expression replace){
-		if (e.toString().equals(v.toString())){
-			return replace;
+		if (e instanceof Variable){
+			if(((Variable)e).getParent() == v)
+				return replace;
+			return e;
 		}
 		if (e instanceof Application){
 			return new Application(varReplace(v, ((Application)e).getLeft(), replace), varReplace(v, ((Application)e).getRight(), replace));
@@ -159,9 +157,31 @@ public class Parser {
 		if (e instanceof Function) {
 			return new Function(((Function)e).getVar(), varReplace(v, ((Function)e).getExp(), replace));
 		}
-
 		
 		return e;
 	} 
+
+	private void getVarNames(Expression e, ArrayList<String> nameList, ArrayList<Variable> expList){
+
+		if(e instanceof Variable && ((Variable)e).getParent() == null){
+			nameList.add(e.toString());
+			expList.add((Variable)e);
+		}
+		if(e instanceof Application){
+			getVarNames(((Application)e).getLeft(), nameList, expList);
+			getVarNames(((Application)e).getRight(), nameList, expList);
+		}
+		if(e instanceof Function){
+			getVarNames(((Function)e).getExp(), nameList, expList);
+		}
+	}
+
+
+	private void replaceVarNames(ArrayList<String> nameList, ArrayList<Variable> expList){
+		for(int i = 0; i < nameList.size(); i++){
+			expList.get(i).setName(nameList.get(i));
+		}
+
+	}
 
 }

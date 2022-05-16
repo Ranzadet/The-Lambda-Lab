@@ -18,6 +18,8 @@ public class Lexer {
 	 *    [(, \, bat, ., bat, flies, ), cat, \, g, ., joy!, )]
 	 *
 	 */
+	private ArrayList<Character> allowed = new ArrayList<>(Arrays.asList('+', '-', '/', '*', '^', '&', '$', '#', '@', '!', ':', '<', '>', '%'));
+	
 	public ArrayList<String> tokenize(String input) {
 		ArrayList<String> tokens = new ArrayList<String>();
 		ArrayList<String> important = new ArrayList<>();
@@ -25,6 +27,7 @@ public class Lexer {
 		important.add("=");
 		important.add("(");
 		important.add(")");
+		
 				
 		
 
@@ -45,21 +48,22 @@ public class Lexer {
 			catch(Exception e){	
 			}
 			
-			if (isLetter(c.charAt(0))){
-				currString += c;
-			}
+
 			if(c.equals(" ")){
 				if(!currString.strip().equals(""))
 				    tokens.add(currString.strip());
 				currString = "";
 			}
-			if(important.contains(c)){
+			else if(important.contains(c)){
 				if(!currString.strip().equals(""))
 					tokens.add(currString.strip());
 				currString = "";
 				currString += c;
 				tokens.add(currString);
 				currString = "";
+			}
+			else if (isLetter(c.charAt(0))){
+				currString += c;
 			}
 			
 			i++;
@@ -75,14 +79,11 @@ public class Lexer {
 	}
 	
 	private boolean isLetter(Character c) {
-		char start1 = 'a';
-		char end1 = 'z';
-		char start2 = 'A';
-		char end2 = 'Z';
-		char start3 = '0';
-		char end3 = '9';
+		char start = '!';
+		char end = '~';
+
 		
-		if ((c >= start1 && c <= end1) || (c >= start2 && c <= end2) || (c >= start3 && c <= end3))
+		if ((c >= start && c <= end))
 			return true;
 		return false;
 	}
