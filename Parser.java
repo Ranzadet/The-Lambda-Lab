@@ -3,6 +3,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 
 public class Parser {
+	private final boolean DEBUG = false;
+	
 	private ArrayList<String> tokens;
 	private ArrayList<Byte> parens = new ArrayList<>();
 	private HashMap<String, Expression> symbols = new HashMap<>();
@@ -95,7 +97,8 @@ public class Parser {
 		}
 		if(s.equals("run")){
 			Expression runnable = _parse(null);
-			System.out.println(runnable);
+			if(DEBUG)
+				System.out.println(runnable);
 			Expression ran = run(runnable);
 			
 			return ran;
@@ -135,7 +138,8 @@ public class Parser {
 			
 		//System.out.println("Before: "+exp);
 		if(stack == 0) {
-			System.out.println("<-------  "+exp+"  ------->");
+			if(DEBUG)
+				System.out.println("<-------  "+exp+"  ------->");
 		}
 		stack++;
 		Expression left = run(((Application)exp).getLeft());
@@ -150,16 +154,20 @@ public class Parser {
 			getVarNames(right, oldNames, oldVars); //getVarNames will just add all variables in said expression into the arrayList
 			Variable var = ((Function)left).getVar();
 			Expression funcExp = ((Function)left).getExp();//.deepCopy();//EXPERIMENTAL
-			System.out.print("Beta Reducing:  "+newApp+"  -->  ");
+			if(DEBUG)
+				System.out.print("Beta Reducing:  "+newApp+"  -->  ");
 			newApp = varReplace(var, funcExp, right);
-			System.out.println(newApp);
+			if(DEBUG)
+				System.out.println(newApp);
 			if(newApp instanceof Function) {
 				
 				if(oldNames.contains(((Function)newApp).getVar().getName())){
-					System.out.print("Alpha Reducing: "+newApp+"  -->  ");
+					if(DEBUG)
+						System.out.print("Alpha Reducing: "+newApp+"  -->  ");
 					((Function)newApp).alphaReduce();
 					replaceVarNames(oldNames, oldVars);
-					System.out.println(newApp);
+					if(DEBUG)
+						System.out.println(newApp);
 				}
 			}
 			
