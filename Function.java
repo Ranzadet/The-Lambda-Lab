@@ -7,9 +7,13 @@ public class Function implements Expression {
     private static Set<String> taken = new HashSet<>();
 
     public Function(Variable v, Expression e){
-        param = v;
-        exp = e;
+        param = v;//.deepCopy();
+        exp = e;//.deepCopy();
         assignParent(exp);
+    }
+    
+    public Function deepCopy() {
+    	return new Function(param.paramCopy(), exp.deepCopy());
     }
 
     public Expression getExp(){

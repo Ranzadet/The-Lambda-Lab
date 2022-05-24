@@ -7,6 +7,10 @@ public class Application implements Expression {
         left = l;
         right = r;
     }
+    
+    public Application deepCopy() {
+    	return new Application(left.deepCopy(), right.deepCopy());
+    }
 
     public Expression getLeft(){
         return left;

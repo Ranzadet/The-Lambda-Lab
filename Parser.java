@@ -7,9 +7,13 @@ public class Parser {
 	private ArrayList<Byte> parens = new ArrayList<>();
 	private HashMap<String, Expression> symbols = new HashMap<>();
 	private String firstToken = "";
+//	private ArrayList<Expression> before = new ArrayList<>();
+//	private ArrayList<Expression> after = new ArrayList<>();
+	private int stack = 0;
+	
 	
 	/*
-	 * TODO: enable two-way lookup table to simplify expressions
+	 * TODO: - num 2
 	 * 
 	 */
 	public Expression parse(ArrayList<String> tokenList) throws ParseException {
@@ -23,6 +27,17 @@ public class Parser {
 		try{
 			return _parse(null);
 		}
+//		try{
+//			Expression p = _parse(null);
+//			if(symbols.containsValue(p)) {
+//				for(String s : symbols.keySet()) {
+//					if(symbols.get(s).equals(p)) {
+//						return new Variable(s);
+//					}
+//				}
+//			}
+//			return p;
+//		}
 		catch(Exception e){
 			System.out.println("Incorrectly Formatted Expression. "+e);
 		}
@@ -80,7 +95,9 @@ public class Parser {
 		}
 		if(s.equals("run")){
 			Expression runnable = _parse(null);
+			System.out.println(runnable);
 			Expression ran = run(runnable);
+			
 			return ran;
 		}
 		else{
@@ -94,7 +111,7 @@ public class Parser {
 			}
 			if(exp == null)
 				return _parse(mapped);
-			return _parse(new Application(exp, mapped)); //later, check for s in stored expressions list
+			return _parse(new Application(exp, mapped)); 
 		}
 	}
 	
@@ -116,29 +133,39 @@ public class Parser {
 		}
 		
 			
-
+		//System.out.println("Before: "+exp);
+		if(stack == 0) {
+			System.out.println("<-------  "+exp+"  ------->");
+		}
+		stack++;
 		Expression left = run(((Application)exp).getLeft());
 		Expression right = run(((Application)exp).getRight());
 		Expression newApp = new Application(left, right);
+		stack--;
+		//System.out.println("   ---  After: "+newApp);
 
 		if(left instanceof Function){
 			ArrayList<String> oldNames = new ArrayList<>();
 			ArrayList<Variable> oldVars = new ArrayList<>();
 			getVarNames(right, oldNames, oldVars); //getVarNames will just add all variables in said expression into the arrayList
 			Variable var = ((Function)left).getVar();
-			Expression funcExp = ((Function)left).getExp();
+			Expression funcExp = ((Function)left).getExp();//.deepCopy();//EXPERIMENTAL
+			System.out.print("Beta Reducing:  "+newApp+"  -->  ");
 			newApp = varReplace(var, funcExp, right);
+			System.out.println(newApp);
 			if(newApp instanceof Function) {
-				// if(((Function)newApp).getVar().toString().equals(right.toString())) { 
+				
 				if(oldNames.contains(((Function)newApp).getVar().getName())){
+					System.out.print("Alpha Reducing: "+newApp+"  -->  ");
 					((Function)newApp).alphaReduce();
 					replaceVarNames(oldNames, oldVars);
+					System.out.println(newApp);
 				}
 			}
 			
 //			if(newApp instanceof Application) {
-//				return run(newApp);
-//			
+//				return run(newApp);  split into left and right??
+
 			return run(newApp);
 		}
 		
@@ -146,20 +173,22 @@ public class Parser {
 //			exp = new Application(run(left))
 //			return run(exp);
 //		}
+
 		return newApp;
 	}
 
 	private Expression varReplace(Variable v, Expression e, Expression replace){
 		if (e instanceof Variable){
 			if(((Variable)e).getParent() == v)
-				return replace;
-			return e;
+				return replace.deepCopy();
+			return e;//.deepCopy();
 		}
 		if (e instanceof Application){
 			return new Application(varReplace(v, ((Application)e).getLeft(), replace), varReplace(v, ((Application)e).getRight(), replace));
 		}
 		if (e instanceof Function) {
-			return new Function(((Function)e).getVar(), varReplace(v, ((Function)e).getExp(), replace));
+			//if( !(((Function)e).getVar().getName().equals(v.getName())) )
+				return new Function(((Function)e).getVar(), varReplace(v, ((Function)e).getExp(), replace));
 		}
 		
 		return e;
