@@ -20,7 +20,7 @@ public class Console {
 			System.out.println(e);
 		}
 
-		System.out.println("λ works!");
+		System.out.println("λ works!\nType 'DEBUG' to toggle Debug mode");
 		
 		Lexer lexer = new Lexer();
 		Parser parser = new Parser();

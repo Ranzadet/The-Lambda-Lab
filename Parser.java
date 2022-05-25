@@ -3,14 +3,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 
 public class Parser {
-	private final boolean DEBUG = false;
+	private boolean DEBUG = false;
 	
 	private ArrayList<String> tokens;
 	private ArrayList<Byte> parens = new ArrayList<>();
 	private HashMap<String, Expression> symbols = new HashMap<>();
 	private String firstToken = "";
-//	private ArrayList<Expression> before = new ArrayList<>();
-//	private ArrayList<Expression> after = new ArrayList<>();
 	private int stack = 0;
 	
 	
@@ -29,17 +27,7 @@ public class Parser {
 		try{
 			return _parse(null);
 		}
-//		try{
-//			Expression p = _parse(null);
-//			if(symbols.containsValue(p)) {
-//				for(String s : symbols.keySet()) {
-//					if(symbols.get(s).equals(p)) {
-//						return new Variable(s);
-//					}
-//				}
-//			}
-//			return p;
-//		}
+
 		catch(Exception e){
 			System.out.println("Incorrectly Formatted Expression. "+e);
 		}
@@ -101,7 +89,15 @@ public class Parser {
 				System.out.println(runnable);
 			Expression ran = run(runnable);
 			
+			while(canReduce(ran)) {
+				ran = run(ran);
+			}
+			
 			return ran;
+		}
+		if(s.equals("DEBUG")) {
+			DEBUG = !DEBUG;
+			return new Variable("DEBUG: "+DEBUG);
 		}
 		else{
 			//otherwise, the token is a variable
@@ -120,23 +116,15 @@ public class Parser {
 	
 	
 
-
 	private Expression run(Expression exp){
 		if (exp instanceof Variable)
 			return exp;
 
-//		if (exp instanceof Function){
-//			if (((Function)exp).getExp() instanceof Application){
-//				return new Function(((Function)exp).getVar(), run((((Function)exp).getExp())));
-//			}
-//			return exp;
-//		}
 		if (exp instanceof Function){
 			return new Function(((Function)exp).getVar(), run((((Function)exp).getExp())));
 		}
 		
-			
-		//System.out.println("Before: "+exp);
+
 		if(stack == 0) {
 			if(DEBUG)
 				System.out.println("<-------  "+exp+"  ------->");
@@ -146,7 +134,7 @@ public class Parser {
 		Expression right = run(((Application)exp).getRight());
 		Expression newApp = new Application(left, right);
 		stack--;
-		//System.out.println("   ---  After: "+newApp);
+
 
 		if(left instanceof Function){
 			ArrayList<String> oldNames = new ArrayList<>();
@@ -171,19 +159,35 @@ public class Parser {
 				}
 			}
 			
-//			if(newApp instanceof Application) {
-//				return run(newApp);  split into left and right??
 
-			return run(newApp);
+			return newApp;
 		}
 		
-//		if(left instanceof Application) {
-//			exp = new Application(run(left))
-//			return run(exp);
-//		}
 
 		return newApp;
 	}
+	
+	
+	private boolean canReduce(Expression exp) {
+		
+		if(exp instanceof Variable) {
+			return false;
+		}
+		if(exp instanceof Function) {
+			return canReduce(((Function)exp).getExp());
+		}
+		if(exp instanceof Application) {
+			if(((Application)exp).getLeft() instanceof Function) {
+				return true;
+			}
+			boolean left = canReduce(((Application)exp).getLeft());
+			boolean right = canReduce(((Application)exp).getRight());
+			return (left || right);
+		}
+		return false;
+	}
+	
+	
 
 	private Expression varReplace(Variable v, Expression e, Expression replace){
 		if (e instanceof Variable){
@@ -226,3 +230,4 @@ public class Parser {
 	}
 
 }
+
