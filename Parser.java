@@ -10,6 +10,8 @@ public class Parser {
 	private HashMap<String, Expression> symbols = new HashMap<>();
 	private String firstToken = "";
 	private int stack = 0;
+	private String s;
+	private boolean modified;
 	
 	
 	/*
@@ -25,7 +27,19 @@ public class Parser {
 		}
 		firstToken = tokens.get(0);
 		try{
-			return _parse(null);
+			Expression exp = _parse(null);
+			
+			s = "";
+			symbols.forEach((key, value) -> {
+				if(exp.toString().equals(value.toString())) {
+					s = key;
+					modified = true;
+				}
+			});
+			if(modified && !(s.toString().equals("")))
+				return new Variable(s);
+			
+			return exp;
 		}
 
 		catch(Exception e){
@@ -141,24 +155,26 @@ public class Parser {
 			ArrayList<Variable> oldVars = new ArrayList<>();
 			getVarNames(right, oldNames, oldVars); //getVarNames will just add all variables in said expression into the arrayList
 			Variable var = ((Function)left).getVar();
-			Expression funcExp = ((Function)left).getExp();//.deepCopy();//EXPERIMENTAL
+			Expression funcExp = ((Function)left).getExp();
 			if(DEBUG)
 				System.out.print("Beta Reducing:  "+newApp+"  -->  ");
 			newApp = varReplace(var, funcExp, right);
 			if(DEBUG)
 				System.out.println(newApp);
-			if(newApp instanceof Function) {
-				
-				if(oldNames.contains(((Function)newApp).getVar().getName())){
-					if(DEBUG)
-						System.out.print("Alpha Reducing: "+newApp+"  -->  ");
-					((Function)newApp).alphaReduce();
-					replaceVarNames(oldNames, oldVars);
-					if(DEBUG)
-						System.out.println(newApp);
-				}
-			}
 			
+//			if(newApp instanceof Function) {
+//				
+//				if(oldNames.contains(((Function)newApp).getVar().getName())){
+//					if(DEBUG)
+//						System.out.print("Alpha Reducing: "+newApp+"  -->  ");
+//					((Function)newApp).alphaReduce();
+//					replaceVarNames(oldNames, oldVars);
+//					if(DEBUG)
+//						System.out.println(newApp);
+//				}
+//			}
+			applyReductions(newApp);
+			//replaceVarNames(oldNames, oldVars);
 
 			return newApp;
 		}
@@ -191,15 +207,14 @@ public class Parser {
 
 	private Expression varReplace(Variable v, Expression e, Expression replace){
 		if (e instanceof Variable){
-			if(((Variable)e).getParent() == v)
+			if(((Variable)e).getParent() == v && !(((Variable)e).isFree()))
 				return replace.deepCopy();
-			return e;//.deepCopy();
+			return e;
 		}
 		if (e instanceof Application){
 			return new Application(varReplace(v, ((Application)e).getLeft(), replace), varReplace(v, ((Application)e).getRight(), replace));
 		}
 		if (e instanceof Function) {
-			//if( !(((Function)e).getVar().getName().equals(v.getName())) )
 				return new Function(((Function)e).getVar(), varReplace(v, ((Function)e).getExp(), replace));
 		}
 		
@@ -208,9 +223,10 @@ public class Parser {
 
 	private void getVarNames(Expression e, ArrayList<String> nameList, ArrayList<Variable> expList){
 
-		if(e instanceof Variable && ((Variable)e).getParent() == null){
+		if(e instanceof Variable && ((Variable)e).getParent() == null && ((Variable)e).getParentID() == 0){
 			nameList.add(e.toString());
 			expList.add((Variable)e);
+			((Variable)e).setFree();
 		}
 		if(e instanceof Application){
 			getVarNames(((Application)e).getLeft(), nameList, expList);
@@ -227,6 +243,23 @@ public class Parser {
 			expList.get(i).setName(nameList.get(i));
 		}
 
+	}
+	
+	private void applyReductions(Expression exp) {
+		if(exp instanceof Function) {
+			if(((Function)exp).needsReduction()) {
+				if(DEBUG)
+					System.out.print("Alpha Reducing: "+exp+"  -->  ");
+				((Function)exp).alphaReduce();
+				if(DEBUG)
+					System.out.println(exp);
+			}
+			applyReductions(((Function)exp).getExp());
+		}
+		if(exp instanceof Application) {
+			applyReductions(((Application)exp).getLeft());
+			applyReductions(((Application)exp).getRight());
+		}
 	}
 
 }

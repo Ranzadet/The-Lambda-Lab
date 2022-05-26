@@ -6,6 +6,7 @@ public class Variable implements Expression {
 	private int lastParentID = 0;
 	private int parentID = 0;
 	private static int globalID = 1;
+	private boolean free = false;
 	
 	public Variable(String name) {
 		this.name = name;
@@ -15,6 +16,8 @@ public class Variable implements Expression {
 	public Variable deepCopy() {
 		Variable newVar = new Variable(name);
 		newVar.setParentID(getParentID());
+		if(free)
+			newVar.setFree();
     	return newVar;//this;
     }
 	
@@ -35,7 +38,6 @@ public class Variable implements Expression {
 				parentID = v.getID();
 			}
 		}
-			
 	}
 
 	public String getName(){
@@ -59,11 +61,20 @@ public class Variable implements Expression {
 	}
 
 	public void setName(String s){
-		name = s;
+		if(!free)
+			name = s;
+	}
+	
+	public void setFree() {
+		free = true;
 	}
 	
 	public String toString() {
 		return name;
+	}
+	
+	public boolean isFree() {
+		return free;
 	}
 
 }

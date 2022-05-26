@@ -30,8 +30,9 @@ public class Function implements Expression {
 
     private void assignParent(Expression e){
         if (e instanceof Variable){
-            if(e.toString().equals(param.toString()))
+            if(e.toString().equals(param.toString())) {
                 ((Variable)e).setParent(param);
+            }
         }
         if (e instanceof Application){
             assignParent(((Application)e).getLeft());
@@ -69,6 +70,23 @@ public class Function implements Expression {
         if(e instanceof Function){
             _alphaReduce(((Function)e).getExp(), replacement);
         }
+    }
+    
+    public boolean needsReduction(){
+    	return needsReduction(exp);
+    }
+    
+    private boolean needsReduction(Expression e) {
+    	if(e instanceof Variable) {
+    		if(((Variable)e).getName().equals(param.getName()) && ((Variable)e).isFree())
+    			return true;
+    		return false;
+    	}
+    	if(e instanceof Function) {
+    		return needsReduction(((Function)e).getExp());
+    	}
+    	
+    	return (needsReduction(((Application)e).getLeft()) || needsReduction(((Application)e).getRight()));
     }
 
     
