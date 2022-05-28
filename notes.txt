@@ -3,3 +3,5 @@ b. 8
 c. ~20 hours
 d. N/A
 e. 100% (+ extra credit ^_^ )
+f. I implemented a feature that greatly assisted my ability to effeciently debug the running expressions part of the lab, called DEBUG mode.
+   If you type DEBUG into the console, all alpha, beta, and eta reductions will be printed as they occur in the interpreter process.
