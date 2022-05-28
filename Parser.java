@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Parser {
 	private boolean DEBUG = false;
@@ -12,6 +13,7 @@ public class Parser {
 	private int stack = 0;
 	private String s;
 	private boolean modified;
+	private Expression lastInc;
 	
 	
 	/*
@@ -106,8 +108,26 @@ public class Parser {
 			while(canReduce(ran)) {
 				ran = run(ran);
 			}
-			
 			return ran;
+		}
+		if(s.equals("populate")) {
+			int lowerBound = Integer.parseInt(tokens.get(0));
+			int upperBound = Integer.parseInt(tokens.get(1));
+			System.out.println(lowerBound);
+			System.out.println(upperBound);
+			
+			ArrayList<String> numbers = new ArrayList<String>();
+			for(int i = lowerBound;i<=upperBound;i++) {
+				numbers.add("" + i);
+			}
+			
+			numbers.forEach((num) -> {
+				tokens = new ArrayList<String>(Arrays.asList(num, "=", "run", "succ", "" + (Integer.parseInt(num)-1)));
+				_parse(null);
+			});
+			
+			tokens = new ArrayList<String>();
+			
 		}
 		if(s.equals("DEBUG")) {
 			DEBUG = !DEBUG;
