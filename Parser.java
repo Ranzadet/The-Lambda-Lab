@@ -113,20 +113,47 @@ public class Parser {
 		if(s.equals("populate")) {
 			int lowerBound = Integer.parseInt(tokens.get(0));
 			int upperBound = Integer.parseInt(tokens.get(1));
-			System.out.println(lowerBound);
-			System.out.println(upperBound);
+			
+			if(lowerBound > upperBound || lowerBound < 0) {
+				return new Variable("Incorrectly Formatted Expression. populate is only defined for lowerbounds <= upperbounds and lowerbounds >= 0");
+			}
+			
+			tokens = new ArrayList<String>(Arrays.asList("0","=","\\","f",".","\\","x",".","x"));
+			_parse(null);
+
+			if(!symbols.containsKey("succ")) {
+				tokens = new ArrayList<String>(Arrays.asList("succ", "=", "\\", "n", ".", "\\", "f", ".", "\\", "x", ".", "f", "(", "n", "f", "x", ")"));
+				_parse(null);
+			}
+			if(!symbols.containsKey(""+(lowerBound-1))) {
+				if(lowerBound == 0)
+					lowerBound = 1;
+				
+				if(upperBound > 1) {
+					tokens = new ArrayList<String>(Arrays.asList(""+(lowerBound-1), "=", "run", "0"));
+					for(int i = 1;i<lowerBound;i++) {
+						tokens.add(3, "succ");
+						tokens.add(3, "(");
+						tokens.add(")");
+					}
+					_parse(null);
+				}
+			}
+			
 			
 			ArrayList<String> numbers = new ArrayList<String>();
 			for(int i = lowerBound;i<=upperBound;i++) {
-				numbers.add("" + i);
+				if(!symbols.containsKey(""+i))
+					numbers.add("" + i);
 			}
+			
 			
 			numbers.forEach((num) -> {
 				tokens = new ArrayList<String>(Arrays.asList(num, "=", "run", "succ", "" + (Integer.parseInt(num)-1)));
 				_parse(null);
 			});
 			
-			tokens = new ArrayList<String>();
+			return new Variable("Populated numbers "+lowerBound+" to "+upperBound);
 			
 		}
 		if(s.equals("DEBUG")) {
