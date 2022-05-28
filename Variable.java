@@ -1,3 +1,4 @@
+//Benen Sullivan
 import java.util.ArrayList;
 public class Variable implements Expression {
 	private String name;

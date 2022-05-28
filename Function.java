@@ -1,3 +1,4 @@
+//Benen Sullivan
 import java.util.Set;
 import java.util.HashSet;
 public class Function implements Expression {

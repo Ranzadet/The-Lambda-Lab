@@ -1,3 +1,4 @@
+//Benen Sullivan
 import java.util.HashMap;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -169,6 +170,11 @@ public class Parser {
 					return _parse(new Variable(s));
 				return _parse(new Application(exp, new Variable(s)));
 			}
+			
+			if(DEBUG) {
+				System.out.println("Eta reducing: "+s+" --> "+mapped);
+			}
+			
 			if(exp == null)
 				return _parse(mapped);
 			return _parse(new Application(exp, mapped)); 
