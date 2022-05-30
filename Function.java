@@ -55,6 +55,7 @@ public class Function implements Expression {
             }
         }
 
+        taken.add(""+c);
         _alphaReduce(exp, ""+c);
         param.setName(""+c);
     }
