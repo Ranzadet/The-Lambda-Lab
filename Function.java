@@ -48,16 +48,23 @@ public class Function implements Expression {
     public void alphaReduce(){
         taken.add(param.toString());
         char c = 'A';
-        while(taken.contains(""+c)){
+        String alphaString = ""+c;
+        while(taken.contains(alphaString)){
             c = (char)(c + 1);
             if(c > 'Z' && c < 'a'){
                 c = 'a';
             }
+            if(c > '~') {
+            	c = 'A';
+            	alphaString = alphaString.substring(0, alphaString.length()-1) + c;
+            	alphaString += c;
+            }
+            alphaString = alphaString.substring(0, alphaString.length()-1) + c;
         }
 
-        taken.add(""+c);
-        _alphaReduce(exp, ""+c);
-        param.setName(""+c);
+        taken.add(alphaString);
+        _alphaReduce(exp, alphaString);
+        param.setName(alphaString);
     }
 
     private void _alphaReduce(Expression e, String replacement){
